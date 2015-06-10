@@ -3,7 +3,7 @@ from itertools import chain
 import hashlib
 import json
 
-from django.forms.widgets import Select
+from django.forms.widgets import SelectMultiple as Select
 from django.utils.safestring import mark_safe
 from django.utils.encoding import smart_unicode
 from django.conf import settings
@@ -26,7 +26,7 @@ def choices_from_queryset(queryset):
     queryset: An instance of django.db.models.query.QuerySet
     """
     return chain(
-        [EMPTY_CHOICE],
+        # [EMPTY_CHOICE],
         [(o.pk, smart_unicode(o)) for o in queryset],
     )
 
@@ -42,7 +42,7 @@ def choices_from_instance(instance, widget):
     try:
         for trigger_field in widget.trigger_fields:
             getattr(instance, trigger_field)
-    except (ObjectDoesNotExist, AttributeError):
+    except (ObjectDoesNotExist, AttributeError, ValueError):
         return [('', widget.empty_choices_text(instance))]
     
     return choices_from_queryset(widget.queryset(instance))
@@ -60,7 +60,7 @@ def details_from_instance(instance, widget):
         for trigger_field in widget.trigger_fields:
             getattr(instance, trigger_field)
         related_instance = getattr(instance, widget.base_field.name)
-    except (ObjectDoesNotExist, AttributeError):
+    except (ObjectDoesNotExist, AttributeError, ValueError):
         return u''
     return widget.details(related_instance, instance)
 
